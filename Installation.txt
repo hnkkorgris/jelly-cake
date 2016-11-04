@@ -1,0 +1,23 @@
+#Installation Guide
+
+To deploy jelly-cake, you will need:
+
+- Python
+This came pre-installed on Kali so???
+Also not sure if compatible with 3.0 or what have you
+
+- Virtual environment (venv)
+use easy_install, pip install, or apt-get install for package virtualenv
+then run [$ virtualenv venv] to create the environment
+switch between virtual environments using [$ . venv/bin/activate]
+full installation guide here --> http://flask.pocoo.org/docs/0.11/installation/
+
+- Python libraries:
+these are all installed with pip, probably in venv, not sure if that makes a difference
+-- Flask
+-- py2neo==2.0.8
+
+- Neo4j 
+installation guide for linux here --> http://debian.neo4j.org/
+Be sure to mention the config file with login credentials
+Will also need to load data somehow..
