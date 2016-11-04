@@ -12,14 +12,15 @@ class NeoProvider(object):
 		self.store = Store(self.graph)
 		
 	def get_start_screen(self):
-		node_map = self.graph.cypher.execute("MATCH (q {asset: 1})-[r]->() RETURN q,r").to_subgraph()
+		first_question_map = self.graph.cypher.execute("MATCH (q {id:1}) RETURN q").to_subgraph()
 		start_screen = Screen()
 
-		init_node = iter(node_map.nodes).next()
-		start_screen.question = init_node
+		first_question = iter(first_question_map.nodes).next()
+		start_screen.question = first_question
 
+		relationship_map = self.graph.cypher.execute("MATCH (q {id:1})-[r]->() RETURN q,r").to_subgraph()
 		answers = [None for i in range(3)]
-		rel_iterator = iter(node_map.relationships)
+		rel_iterator = iter(relationship_map.relationships)
 		current_rel = next(rel_iterator, None)
 		while(current_rel != None):
 			answers[current_rel.properties['opt']-1] = current_rel
