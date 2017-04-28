@@ -7,7 +7,7 @@ class NeoProvider(object):
 	def __init__(self):
 		
 		# TODO read this from a config file
-		uri = "http://neo4j:firebird101@localhost:7474/db/data"
+		uri = "http://neo4j:grumble@localhost:7474/db/data"
 		self.graph = Graph(uri)
 		self.store = Store(self.graph)
 		
