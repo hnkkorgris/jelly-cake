@@ -1,6 +1,6 @@
 from py2neo import Graph, Node, Relationship, Subgraph
 from py2neo.ext.ogm import Store
-from models import Screen
+from models import Screen, Navigation
 
 class NeoProvider(object):
 	
@@ -12,32 +12,34 @@ class NeoProvider(object):
 		self.store = Store(self.graph)
 		
 	def get_start_screen(self):
-		first_question_map = self.graph.cypher.execute("MATCH (q {id:1}) RETURN q").to_subgraph()
-		start_screen = Screen()
+		# Grab the node with start flag set to mark the beginning of the tree
+		start_screen_map = self.graph.cypher.execute("MATCH (q {start: true}) RETURN q").to_subgraph()
+		start_screen_node = iter(start_screen_map.nodes).next()
+		# start_screen.key = first_question.properties['id']
+		# start_screen.question = first_question.properties['text']
 
-		first_question = iter(first_question_map.nodes).next()
-		start_screen.question = first_question
+		# Grab all nav relationships pointing out of the start node
+		relationship_map = self.graph.cypher.execute("MATCH (q {start: true})-[r]->() RETURN q,r").to_subgraph()
+		start_screen_rels = iter(relationship_map.relationships)
 
-		relationship_map = self.graph.cypher.execute("MATCH (q {id:1})-[r]->() RETURN q,r").to_subgraph()
-		answers = [None for i in range(3)]
-		rel_iterator = iter(relationship_map.relationships)
-		current_rel = next(rel_iterator, None)
+		# Construct the navigation objects
+		start_screen_navs = []
+		current_rel = next(start_screen_rels, None)
 		while(current_rel != None):
-			answers[current_rel.properties['opt']-1] = current_rel
-			current_rel=next(rel_iterator, None)
-		start_screen.ans1 = answers[0]
-		start_screen.ans2 = answers[1]
-		start_screen.ans3 = answers[2]
+			start_screen_navs.append(Navigation(current_rel))
+			current_rel = next(start_screen_rels, None)
 
+		# Construct the start screen
+		start_screen = Screen(start_screen_node, start_screen_navs)
 		return start_screen
 
-	def get_next_screen(self, from_rel):
-		next_screen = Screen()
-		node_map = self.graph.cypher.execute("MATCH (q {id: %d})-[r]->() RETURN q,r" % from_rel.end_node.properties['id']).to_subgraph()
+	# def get_next_screen(self, from_rel):
+	# 	next_screen = Screen()
+	# 	node_map = self.graph.cypher.execute("MATCH (q {id: %d})-[r]->() RETURN q,r" % from_rel.end_node.properties['id']).to_subgraph()
 
-		next_screen.question = from_rel.end_node
-		next_screen.ans1 = next(iter(node_map.relationships), None)
-		next_screen.ans2 = from_rel
-		next_screen.ans3 = from_rel
+	# 	next_screen.question = from_rel.end_node
+	# 	next_screen.ans1 = next(iter(node_map.relationships), None)
+	# 	next_screen.ans2 = from_rel
+	# 	next_screen.ans3 = from_rel
 
-		return next_screen
+	# 	return next_screen
