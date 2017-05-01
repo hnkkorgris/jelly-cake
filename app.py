@@ -15,20 +15,8 @@ def load_page():
 @app.route('/currentScreen')
 def get_screen():
 	return jsonify(screen = current_screen.serialize())
-	# question = current_screen.text
-	# # TODO: support variable numbers of options
-	# ans1 = current_screen.navs.nodeat(0).text
-	# ans2 = current_screen.navs.nodeat(1).text
-	# ans3 = current_screen.navs.nodeat(2).text
 	
 	# next_screen = db.get_next_screen(current_screen.ans1)
-
-	# return jsonify(
-	# 	question = question,
-	# 	ans1 = ans1,
-	# 	ans2 = ans2,
-	# 	ans3 = ans3
-	# )
 
 current_screen = db.get_start_screen()
 	

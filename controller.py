@@ -15,8 +15,6 @@ class NeoProvider(object):
 		# Grab the node with start flag set to mark the beginning of the tree
 		start_screen_map = self.graph.cypher.execute("MATCH (q {start: true}) RETURN q").to_subgraph()
 		start_screen_node = iter(start_screen_map.nodes).next()
-		# start_screen.key = first_question.properties['id']
-		# start_screen.question = first_question.properties['text']
 
 		# Grab all nav relationships pointing out of the start node
 		relationship_map = self.graph.cypher.execute("MATCH (q {start: true})-[r]->() RETURN q,r").to_subgraph()
