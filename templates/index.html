@@ -18,14 +18,14 @@
       <div class="question">
       {{ question }}
       </div>
-      <div class="answer">
-      {{ ans1 }}
+      <div class="answer" ng-click="navigate(ans1.option)">
+      {{ ans1.text }}
       </div>
-      <div class="answer">
-      {{ ans2 }}
+      <div class="answer" ng-click="navigate(ans2.option)">
+      {{ ans2.text }}
       </div>
-      <div class="answer">
-      {{ ans3 }}
+      <div class="answer" ng-click="navigate(ans3.option)">
+      {{ ans3.text }}
       </div>
   </div>
 </div>

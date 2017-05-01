@@ -13,11 +13,11 @@ class NeoProvider(object):
 		
 	def get_start_screen(self):
 		# Grab the node with start flag set to mark the beginning of the tree
-		start_screen_map = self.graph.cypher.execute("MATCH (q {start: true}) RETURN q").to_subgraph()
+		start_screen_map = self.graph.cypher.execute("MATCH (n {start: true}) RETURN n").to_subgraph()
 		start_screen_node = iter(start_screen_map.nodes).next()
 
 		# Grab all nav relationships pointing out of the start node
-		relationship_map = self.graph.cypher.execute("MATCH (q {start: true})-[r]->() RETURN q,r").to_subgraph()
+		relationship_map = self.graph.cypher.execute("MATCH (n {start: true})-[r]->() RETURN n,r").to_subgraph()
 		start_screen_rels = iter(relationship_map.relationships)
 
 		# Construct the navigation objects
@@ -31,13 +31,25 @@ class NeoProvider(object):
 		start_screen = Screen(start_screen_node, start_screen_navs)
 		return start_screen
 
-	# def get_next_screen(self, from_rel):
-	# 	next_screen = Screen()
-	# 	node_map = self.graph.cypher.execute("MATCH (q {id: %d})-[r]->() RETURN q,r" % from_rel.end_node.properties['id']).to_subgraph()
+	# TODO lots of duplciate code, rework a bit
+	def get_next_screen(self, current_screen_key, option):
+		# Grab the node that option points to from current_screen
+		query = "MATCH (:screen {id: %s})-[:nav {opt: %s}]->(n:screen) RETURN n" % (current_screen_key, option)
+		node_map = self.graph.cypher.execute(query).to_subgraph()
+		node = iter(node_map.nodes).next()
 
-	# 	next_screen.question = from_rel.end_node
-	# 	next_screen.ans1 = next(iter(node_map.relationships), None)
-	# 	next_screen.ans2 = from_rel
-	# 	next_screen.ans3 = from_rel
+		# Grab the relationships
+		query = "MATCH (:screen {id: %d})-[r:nav]->() RETURN r" % node.properties['id']
+		relationship_map = self.graph.cypher.execute(query).to_subgraph()
+		rels = iter(relationship_map.relationships)
 
-	# 	return next_screen
+		# Construct the navigation objects
+		next_screen_navs = []
+		current_rel = next(rels, None)
+		while(current_rel != None):
+			next_screen_navs.append(Navigation(current_rel))
+			current_rel = next(rels, None)
+		
+		# Construct the screen
+		next_screen = Screen(node, next_screen_navs)
+		return next_screen

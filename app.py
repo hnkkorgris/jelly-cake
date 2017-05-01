@@ -14,11 +14,13 @@ def load_page():
 
 @app.route('/currentScreen')
 def get_screen():
-	return jsonify(screen = current_screen.serialize())
-	
-	# next_screen = db.get_next_screen(current_screen.ans1)
+	start_screen = db.get_start_screen()
+	return jsonify(screen = start_screen.serialize())
 
-current_screen = db.get_start_screen()
+@app.route('/nextScreen/<key>/<opt>')
+def next_screen(key, opt):
+	next_screen = db.get_next_screen(key, opt)
+	return jsonify(screen = next_screen.serialize())
 	
 if __name__ == '__main__':
 	app.debug = True

@@ -4,8 +4,8 @@
 
   var GameCtrl = function($scope, $http) {
 
+    // TODO: maybe move this to a service
     var loadCurrentScreen = function($http) {
-
       return $http.get("/currentScreen")
         .then(function(response) {
           var jsonResponse = angular.fromJson(response.data);
@@ -13,11 +13,32 @@
         });
     }
 
+    // TODO: same with this, and also remove redundant code
+    var loadNextScreen = function($http, id, opt) {
+      return $http.get("/nextScreen/" + id + "/" + opt)
+        .then(function(response) {
+          var jsonResponse = angular.fromJson(response.data);
+          return jsonResponse.screen;
+        });
+    }
+
+    var populateScreen = function(screen) {
+      $scope.id = screen.key;
+      $scope.question = screen.text;
+      $scope.ans1 = screen.navs[0];
+      $scope.ans2 = screen.navs[1];
+      $scope.ans3 = screen.navs[2];
+    }
+
+    $scope.navigate = function(opt) {
+      loadNextScreen($http, $scope.id, opt)
+        .then(function(response) {
+          populateScreen(response);
+        })
+    }
+
     loadCurrentScreen($http).then(function(response) {
-      $scope.question = response.text
-      $scope.ans1 = response.navs[0].text
-      $scope.ans2 = response.navs[1].text
-      $scope.ans3 = response.navs[2].text
+      populateScreen(response)
     })
   }
 
