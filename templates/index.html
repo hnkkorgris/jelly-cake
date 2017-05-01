@@ -5,30 +5,35 @@
 <script data-require="angular-route@1.4.6" data-semver="1.2.2" src="https://code.angularjs.org/1.2.2/angular-route.js"></script>
 <script src="/static/app.js"></script>
 <script src="/static/gameCtrl.js"></script>
+<script src="/static/dbProvider.js"></script>
 <link rel="stylesheet" type="text/css" href="/static/style.css">
 <title>Vote Volkov for District Attorney</title>
 </head>
-<body>
+<body ng-controller="GameCtrl">
 
-  <div class="stage" ng-controller="GameCtrl">
+  <div class="button-panel">
+    <input type="button" value="Start Over" ng-click="reset()" />
+  </div>
+
+  <div class="stage">
     <div class="image" style="background-image: url(/static/assets/stock.jpg)">
       <div class="foreground" style="content: url(/static/assets/sphere.png)"></div>
+    </div>
+    <div class="dialogue">
+        <div class="question">
+        {{ question }}
+        </div>
+        <div class="answer" ng-click="navigate(ans1.option)">
+        {{ ans1.text }}
+        </div>
+        <div class="answer" ng-click="navigate(ans2.option)">
+        {{ ans2.text }}
+        </div>
+        <div class="answer" ng-click="navigate(ans3.option)">
+        {{ ans3.text }}
+        </div>
+    </div>
   </div>
-  <div class="dialogue">
-      <div class="question">
-      {{ question }}
-      </div>
-      <div class="answer" ng-click="navigate(ans1.option)">
-      {{ ans1.text }}
-      </div>
-      <div class="answer" ng-click="navigate(ans2.option)">
-      {{ ans2.text }}
-      </div>
-      <div class="answer" ng-click="navigate(ans3.option)">
-      {{ ans3.text }}
-      </div>
-  </div>
-</div>
 
 </body>
 </html>
