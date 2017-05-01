@@ -3,6 +3,7 @@ from models import Screen
 from controller import NeoProvider
 
 app = Flask(__name__)
+app.config.update(SEND_FILE_MAX_AGE_DEFAULT=0) # Prevent caching on dev machine
 db = NeoProvider()
 
 @app.route('/')
@@ -21,10 +22,10 @@ def get_screen():
 	next_screen = db.get_next_screen(current_screen.ans1)
 
 	return jsonify(
-		q = question,
-		a1 = ans1,
-		a2 = ans2,
-		a3 = ans3
+		question = question,
+		ans1 = ans1,
+		ans2 = ans2,
+		ans3 = ans3
 	)
 
 current_screen = db.get_start_screen()
