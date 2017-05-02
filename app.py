@@ -1,23 +1,26 @@
-from flask import Flask, url_for, request, render_template
+from flask import Flask, url_for, request, make_response, jsonify
 from models import Screen
 from controller import NeoProvider
 
 app = Flask(__name__)
+app.config.update(SEND_FILE_MAX_AGE_DEFAULT=0) # Prevent caching on dev machine
 db = NeoProvider()
 
 @app.route('/')
 @app.route('/index')
 def load_page():	
-	question = current_screen.question.properties['text']
-	ans1 = current_screen.ans1.properties['text']
-	ans2 = current_screen.ans2.properties['text']
-	ans3 = current_screen.ans3.properties['text']	
 	
-	next_screen = db.get_next_screen(current_screen.ans1)
-	
-	return render_template('page.html', q=question, a1=ans1, a2=ans2, a3=ans3)
+	return make_response(open('templates/index.html').read())
 
-current_screen = db.get_start_screen()
+@app.route('/start')
+def get_screen():
+	start_screen = db.get_start_screen()
+	return jsonify(screen = start_screen.serialize())
+
+@app.route('/next/<key>/<opt>')
+def next_screen(key, opt):
+	next_screen = db.get_next_screen(key, opt)
+	return jsonify(screen = next_screen.serialize())
 	
 if __name__ == '__main__':
 	app.debug = True
