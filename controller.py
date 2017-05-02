@@ -1,6 +1,6 @@
 from py2neo import Graph, Node, Relationship, Subgraph
 from py2neo.ext.ogm import Store
-from models import Screen, Navigation
+from models import Screen, Navigation, Asset
 
 class NeoProvider(object):
 	
@@ -12,44 +12,36 @@ class NeoProvider(object):
 		self.store = Store(self.graph)
 		
 	def get_start_screen(self):
-		# Grab the node with start flag set to mark the beginning of the tree
-		start_screen_map = self.graph.cypher.execute("MATCH (n {start: true}) RETURN n").to_subgraph()
-		start_screen_node = iter(start_screen_map.nodes).next()
+		# Fetch the start node
+		start_node = self.graph.find_one("screen", "start", True)
 
-		# Grab all nav relationships pointing out of the start node
-		relationship_map = self.graph.cypher.execute("MATCH (n {start: true})-[r]->() RETURN n,r").to_subgraph()
-		start_screen_rels = iter(relationship_map.relationships)
+		# Find all the navigations from the start node
+		nav_rels = self.graph.match(start_node, "nav")
 
-		# Construct the navigation objects
-		start_screen_navs = []
-		current_rel = next(start_screen_rels, None)
-		while(current_rel != None):
-			start_screen_navs.append(Navigation(current_rel))
-			current_rel = next(start_screen_rels, None)
+		# Find all the assets for the start node
+		asset_rels = self.graph.match(start_node, "hasAsset")
 
-		# Construct the start screen
-		start_screen = Screen(start_screen_node, start_screen_navs)
+		# Construct the DTOs
+		assets = [Asset(asset_rel.end_node) for asset_rel in asset_rels]
+		navs = [Navigation(nav_rel) for nav_rel in nav_rels]
+		start_screen = Screen(start_node, navs, assets)
 		return start_screen
 
-	# TODO lots of duplciate code, rework a bit
 	def get_next_screen(self, current_screen_key, option):
-		# Grab the node that option points to from current_screen
-		query = "MATCH (:screen {id: %s})-[:nav {opt: %s}]->(n:screen) RETURN n" % (current_screen_key, option)
-		node_map = self.graph.cypher.execute(query).to_subgraph()
-		node = iter(node_map.nodes).next()
+		# Fetch the current node
+		current_node = self.graph.find_one("screen", "id", current_screen_key)
 
-		# Grab the relationships
-		query = "MATCH (:screen {id: %d})-[r:nav]->() RETURN r" % node.properties['id']
-		relationship_map = self.graph.cypher.execute(query).to_subgraph()
-		rels = iter(relationship_map.relationships)
+		# Navigate to the next node via option
+		current_rels = self.graph.match(current_node, "nav")
+		selected_rel = [rel for rel in current_rels if rel.properties['opt'] == int(option)][0]
+		next_node = selected_rel.end_node
 
-		# Construct the navigation objects
-		next_screen_navs = []
-		current_rel = next(rels, None)
-		while(current_rel != None):
-			next_screen_navs.append(Navigation(current_rel))
-			current_rel = next(rels, None)
-		
-		# Construct the screen
-		next_screen = Screen(node, next_screen_navs)
+		# Grab new navigations and assets for the next node
+		next_nav_rels = self.graph.match(next_node, "nav")
+		asset_rels = self.graph.match(next_node, "hasAsset")
+
+		# Construct the DTOs
+		assets = [Asset(asset_rel.end_node) for asset_rel in asset_rels]
+		navs = [Navigation(nav_rel) for nav_rel in next_nav_rels]
+		next_screen = Screen(next_node, navs, assets)
 		return next_screen

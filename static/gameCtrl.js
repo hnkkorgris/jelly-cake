@@ -2,7 +2,7 @@
 
   var app = angular.module("jelly-cake");
 
-  var GameCtrl = function($scope, dbProvider) {
+  var GameCtrl = function($scope, $filter, dbProvider) {
 
     var populateScreen = function(screen) {
       $scope.id = screen.key;
@@ -10,6 +10,18 @@
       $scope.ans1 = screen.navs[0];
       $scope.ans2 = screen.navs[1];
       $scope.ans3 = screen.navs[2];
+
+      $scope.fg = generateUrl(getAsset($filter, screen.assets, "fg").path);
+      $scope.bg = generateUrl(getAsset($filter, screen.assets, "bg").path);
+    }
+
+    var generateUrl = function(relPath) {
+      return "url(/static/assets/" + relPath + ")";
+    }
+
+    var getAsset = function($filter, list, search) {
+      console.log(list);
+      return $filter('filter')(list, {'type': search})[0];
     }
 
     $scope.navigate = function(opt) {
@@ -22,7 +34,6 @@
     $scope.reset = function() {
       dbProvider.getStartScreen()
         .then(function(response) {
-          console.log("Here");
           populateScreen(response);
       })
     }

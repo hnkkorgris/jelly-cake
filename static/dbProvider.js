@@ -5,7 +5,7 @@
   var dbProvider = function($http) {
     
     var getStartScreen = function() {
-      return $http.get("/currentScreen")
+      return $http.get("/start")
         .then(function(response) {
           return translateJsonResponse(response.data);
         });
@@ -13,7 +13,7 @@
 
     // TODO: also remove redundant code
     var getNextScreen = function(id, opt) {
-      return $http.get("/nextScreen/" + id + "/" + opt)
+      return $http.get("/next/" + id + "/" + opt)
         .then(function(response) {
           return translateJsonResponse(response.data);
         });

@@ -12,12 +12,12 @@ def load_page():
 	
 	return make_response(open('templates/index.html').read())
 
-@app.route('/currentScreen')
+@app.route('/start')
 def get_screen():
 	start_screen = db.get_start_screen()
 	return jsonify(screen = start_screen.serialize())
 
-@app.route('/nextScreen/<key>/<opt>')
+@app.route('/next/<key>/<opt>')
 def next_screen(key, opt):
 	next_screen = db.get_next_screen(key, opt)
 	return jsonify(screen = next_screen.serialize())
